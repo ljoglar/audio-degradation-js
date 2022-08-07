@@ -1,5 +1,23 @@
+/**
+ * Audio Degradation Toolkit in JavaScript
+ * Normalisation Degradation Unit
+ *
+ * @module NormaliseAudio
+ *
+ * Description:
+ * Normalises Audio
+ *
+ * Programmer: Luis Joglar-Ongay
+ * luis@luisjoglar.com
+ * Date: August 2022
+ */
 
 class normaliseAudio extends DegradationBase{
+    /**
+     * @param {audio}
+     * @param {number} fs
+     * @param {number} max_amplitude
+     */
     constructor(audio, fs, max_amplitude = 0.999) {
         super(audio, fs);
         this.max_amplitude = max_amplitude;
@@ -21,4 +39,18 @@ class normaliseAudio extends DegradationBase{
             */
         }
     }
+}
+
+let NormaliseAudio = function (audio){
+    if (typeof audio !== "object"){
+        throw new TypeError();
+    }
+    let audioNormalised;
+    if (this.audio !== null) {
+        const maxValueInAudio = Math.max(Math.max(Math.max(Math.abs(this.audio))));
+        audio.forEach((channel) => {
+            audioNormalised.push(channel.map((sample) => this.max_amplitude * sample / maxValueInAudio, MIN_VALUE));
+        });
+    }
+    return audioNormalised;
 }
