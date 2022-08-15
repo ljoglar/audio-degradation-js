@@ -1,5 +1,3 @@
-console.log("asdasd");
-
 let App = {};
 App.audioCtx = null
 App.audioBuffer = null

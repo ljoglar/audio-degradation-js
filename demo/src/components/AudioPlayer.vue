@@ -14,7 +14,7 @@
 <script>
 import {v4 as uuidv4} from 'uuid';
 import WaveSurfer from 'wavesurfer.js'
-import {audioManager} from "../audio/AudioManager.js"
+import {audioManager} from "../audioEngine/AudioManager.js"
 import {emitter} from "../emitter.js";
 
 export default {
@@ -46,7 +46,7 @@ export default {
     this.wavesurfer = WaveSurfer.create({
       container: '#'+this.waveformId,
       waveColor: '#00bd7e',
-      progressColor: '#039766',
+      progressColor: '#027852',
     });
   },
   methods: {

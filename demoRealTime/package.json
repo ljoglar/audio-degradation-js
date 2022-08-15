@@ -1,0 +1,19 @@
+{
+  "name": "demorealtime",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173"
+  },
+  "dependencies": {
+    "tiny-emitter": "^2.1.0",
+    "uuidv4": "^6.2.13",
+    "vue": "^3.2.37",
+    "wavesurfer.js": "^6.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^3.0.1",
+    "vite": "^3.0.4"
+  }
+}

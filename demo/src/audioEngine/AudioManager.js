@@ -2,7 +2,7 @@ import AudioDegradation from '../../../js/audioDegradation.js'
 import {emitter} from "../emitter";
 
 class AudioManager {
-    constructor(audioURL = './assets/audio/cello.wav') {
+    constructor(audioURL = './assets/audioEngine/cello.wav') {
         this.audioContext = new (window.AudioContext ||
             window.webkitAudioContext ||
             window.mozAudioContext ||
