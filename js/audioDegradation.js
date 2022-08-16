@@ -19,8 +19,8 @@ class AudioDegradation {
         this.audio = audio;
     }
 
-    addHarmonicDistortion(num_applications){
-        return HarmonicDistortion.execute(this.audio, num_applications);
+    addHarmonicDistortion(audio, num_applications){
+        return HarmonicDistortion.execute(audio, num_applications);
     }
 }
 

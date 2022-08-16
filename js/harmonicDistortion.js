@@ -13,11 +13,11 @@ import DegradationBase from "./degradationBase.js";
  * Date: August 2022
  */
 
-class HarmonicDistortion extends DegradationBase {
+class HarmonicDistortion{
     static execute(audio, num_applications = 3){
         let audioOut;
         if ( audio !== null ) {
-            audioOut = audio;
+            audioOut = [...audio];
             audioOut.forEach((channel, index) => {
                 for (let i=0; i < num_applications; i++ ) {
                     channel = channel.map((sample) => Math.sin(sample * Math.PI/2 ))

@@ -6,9 +6,7 @@ class HarmonicDistortionProcessor extends AudioWorkletProcessor {
         this.audioDegradation = new AudioDegradation();
     }
     process (inputs, outputs, parameters) {
-        // input is 128 frames
-        // console.log(inputs[0][0]);
-        // this.audioDegradation.addHarmonicDistortion.calculateSample(inputs[0], 3);
+        this.audioDegradation.addHarmonicDistortion(inputs[0], 3);
         return true;
     }
 }

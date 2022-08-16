@@ -19,14 +19,20 @@ export default {
     return {
       uuid: uuidv4(),
       title: "Default Title",
-      playState: 'Play',
+      playState: 'play',
       wavesurfer: null
     }
   },
   methods: {
     audioPlay() {
       console.log("play audio");
-      audioManager.play();
+      if (this.playState === 'play') {
+        audioManager.playOrPause(true);
+        this.playState = 'pause';
+      } else if (this.playState === 'pause') {
+        audioManager.playOrPause(false);
+        this.playState = 'play';
+      }
     },
     audioStop() {
       console.log("stop audio");
