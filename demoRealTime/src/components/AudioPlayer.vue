@@ -1,7 +1,7 @@
 <template>
   <div :id="playerId">
     <h1><slot>Fallback content</slot></h1>
-    <slider v-model="value" :max="30"></slider>
+    <ProgressBar />
     <div id="controls">
       <button @click="audioPlay">{{ playState }}</button>
       <button @click="audioStop">stop</button>
@@ -12,9 +12,11 @@
 <script>
 import {v4 as uuidv4} from 'uuid';
 import {audioManager} from "../audioEngine/AudioManager.js"
+import ProgressBar from "./ProgressBar.vue";
 
 export default {
   name: "audioPlayer",
+  components: {ProgressBar},
   data() {
     return {
       uuid: uuidv4(),
