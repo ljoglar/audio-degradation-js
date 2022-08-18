@@ -1,37 +1,27 @@
 <template>
     <div class="slider">
       <output id="rangeValue"> {{ currentDateString }} </output>
-      <input type = "range" min="0" max="100" @change="updateValue"/>
+      <input type="range" min="0" max="100" step="0.1" @change="updateTime" v-model="value"/>
       <p id="maxValue">00:00</p>
     </div>
 </template>
 
 <script>
-import {audioManager} from "../audioEngine/AudioManager.js"
-import {emitter} from "../emitter";
 
 export default {
   name: "ProgressBar",
+  props: ['onPlayerAction'],
   data() {
     return {
+      value: 0,
+      maxValue: 100,
       currentTime: 0,
       currentDate: new Date(1000),
       currentDateString: '00:00'
     }
   },
-  mounted() {
-    emitter.on('playSound', () => {
-      this.startProgress();
-    });
-    emitter.on('pauseSound', () => {
-      this.pauseProgress();
-    });
-    emitter.on('stopSound', () => {
-      this.stopProgress();
-    });
-  },
   methods: {
-    updateValue(e) {
+    updateTime(e) {
       console.log(e.target.value);
       this.currentTime = e.target.value;
       this.updateDate();
@@ -44,9 +34,10 @@ export default {
 
     startProgress() {
       this.interval = setInterval(() => {
-        this.currentTime = this.currentTime + 1;
+        this.value = this.value + 0.1;
+        this.currentTime = this.value;
         this.updateDate();
-      }, 1000);
+      }, 100);
     },
 
     pauseProgress() {
@@ -56,11 +47,26 @@ export default {
     stopProgress() {
       clearInterval(this.interval);
       this.currentTime = 0;
+      this.value = 0;
       this.currentDateString = '00:00';
+    }
+  },
+  watch: {
+    onPlayerAction: function(newVal) {
+      switch (newVal) {
+        case 'playing':
+          this.startProgress();
+          break;
+        case 'paused':
+          this.pauseProgress();
+          break;
+        case 'stopped':
+          this.stopProgress();
+          break;
+      }
     }
   }
 }
-
 
 </script>
 

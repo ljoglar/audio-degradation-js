@@ -16,14 +16,24 @@ class AudioManager {
         this.gainNode = this.audioContext.createGain();
         this.harmonicDistNode = null;
         this.loadAudio();
+
+        // update volume when slider value changes
+        emitter.on("gainVolumeChange", (value) => {
+            this.gainNode.gain.value = value;
+        });
+
+        // update Harmonic Distortion parameter when slider value changes
+        emitter.on("degradationParamChange", (value) =>{
+            const harmonicDistParam = this.harmonicDistNode.parameters.get('numApplications');
+            harmonicDistParam.setValueAtTime(value, this.audioContext.currentTime);
+        })
     }
 
     async loadAudio() {
         this.audioBuffer = await this.loadAudioTrack();
         if(this.audioBuffer){
+            emitter.emit('audioLoaded');
             console.log("AudioBuffer created");
-            this.audioSource = this.audioContext.createBufferSource();
-            this.audioSource.buffer = this.audioBuffer;
             await this.connectHarmonicDistPipeline();
         }
     }
@@ -31,7 +41,7 @@ class AudioManager {
     async connectHarmonicDistPipeline() {
         await this.audioWorklet.addModule('./src/audioEngine/harmonicDistortionProcessor.js', {}).then(() => {
             this.harmonicDistNode = new AudioWorkletNode(this.audioContext, 'harmonicDistortionProcessor');
-            this.audioSource.connect(this.gainNode).connect(this.harmonicDistNode).connect(this.audioContext.destination);
+            this.gainNode.connect(this.harmonicDistNode).connect(this.audioContext.destination);
         });
     }
 
@@ -39,25 +49,20 @@ class AudioManager {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
-        console.log(state);
         if (state === true) {
             this.audioSource = this.audioContext.createBufferSource();
+            this.audioSource.buffer = this.audioBuffer;
+            this.audioSource.connect(this.gainNode);
             this.audioSource.start(this.currentTime);
-            emitter.emit('playSound');
-            console.log("play");
         } else if (state === false) {
             this.currentTime = this.audioContext.currentTime;
-            emitter.emit('pauseSound');
             this.audioSource.stop();
-            console.log("pause");
         }
     }
 
     stop() {
         this.currentTime = this.audioContext.currentTime;
         this.audioSource.stop();
-        emitter.emit('stopSound');
-        console.log("stop");
     }
 
     async loadAudioTrack() {
