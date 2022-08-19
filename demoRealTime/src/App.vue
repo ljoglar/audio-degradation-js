@@ -1,7 +1,7 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
-import AudioPlayer from './components/AudioPlayer.vue'
+import PlayerCollection from './components/PlayerCollection.vue'
 </script>
 
 <template>
@@ -15,7 +15,7 @@ import AudioPlayer from './components/AudioPlayer.vue'
 
   <main>
     <TheWelcome />
-    <AudioPlayer />
+    <PlayerCollection />
   </main>
 </template>
 

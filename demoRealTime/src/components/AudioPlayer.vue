@@ -1,6 +1,6 @@
 <template>
   <div :id="playerId">
-    <h1><slot>Fallback content</slot></h1>
+    <h1><slot> {{ title }}</slot></h1>
     <ProgressBar :onPlayerAction ="progressState" />
     <div id="controls">
       <button @click="audioPlay" :disabled="!audioLoaded">{{ playAction }}</button>
@@ -20,6 +20,7 @@ import {emitter} from "../emitter";
 export default {
   name: "audioPlayer",
   components: {ProgressBar},
+  props: ['title'],
   data() {
     return {
       uuid: uuidv4(),
