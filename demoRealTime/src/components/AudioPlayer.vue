@@ -1,6 +1,6 @@
 <template>
   <div :id="playerId">
-    <h1><slot> {{ title }}</slot></h1>
+    <h1><slot></slot></h1>
     <ProgressBar :onPlayerAction ="progressState" />
     <div id="controls">
       <button @click="audioPlay" :disabled="!audioLoaded">{{ playAction }}</button>
@@ -13,18 +13,20 @@
 
 <script>
 import {v4 as uuidv4} from 'uuid';
-import {audioManager} from "../audioEngine/AudioManager.js"
+// import {audioManager} from "../audioEngine/AudioManager.js"
 import ProgressBar from "./ProgressBar.vue";
 import {emitter} from "../emitter";
 
 export default {
   name: "audioPlayer",
   components: {ProgressBar},
-  props: ['title'],
+  inject: ['audioManager'],
+  props: ['title', 'degradationName'],
   data() {
     return {
+      //audioManager: this.audioManager,
       uuid: uuidv4(),
-      title: "Default Title",
+      //title: "Default Title",
       playAction: 'play', // play, pause
       wavesurfer: null,
       audioLoaded: false,
@@ -33,6 +35,7 @@ export default {
   },
   computed: {
     playerId() {
+      // console.log(this.audioManager);
       return `player_${this.uuid}`;
     }
   },
@@ -44,12 +47,13 @@ export default {
   methods: {
     audioPlay() {
       console.log("play audio");
+      console.log(this.audioManager);
       if (this.playAction === 'play') {
-        audioManager.playOrPause(true);
+        this.audioManager.playOrPause(true, this.degradationName);
         this.progressState = 'playing';
         this.playAction = 'pause';
       } else if (this.playAction === 'pause') {
-        audioManager.playOrPause(false);
+        this.audioManager.playOrPause(false, this.degradationName);
         this.playAction = 'play';
         this.progressState = 'paused';
       }
@@ -59,7 +63,7 @@ export default {
       console.log("stop audio");
       this.playAction = 'play';
       this.progressState = 'stopped';
-      audioManager.stop();
+      this.audioManager.stop();
     },
 
     updateGainValue(e) {

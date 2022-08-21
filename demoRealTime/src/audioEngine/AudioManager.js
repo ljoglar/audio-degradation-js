@@ -1,21 +1,20 @@
 import {emitter} from "../emitter";
 
 class AudioManager {
-    constructor(audioURL = './src/assets/audio/cello.wav') {
-        this.audioContext = new (window.AudioContext ||
-            window.webkitAudioContext ||
-            window.mozAudioContext ||
-            window.oAudioContext ||
-            window.msAudioContext)();
-        console.log('AudioContext created');
+    constructor(audioContext, audioURL) {
+        this.audioContext = audioContext;
         this.audioURL = audioURL;
-        this.audioBuffer = null;
+        // this.degradationName = degradationName;
+        // this.audioBuffer = null;
         this.audioSource = null;
         this.currentTime = 0;
         this.audioWorklet = this.audioContext.audioWorklet;
         this.gainNode = this.audioContext.createGain();
         this.harmonicDistNode = null;
         this.loadAudio();
+
+        this.HARMONICDISTURL = './src/audioEngine/harmonicDistortionProcessor.js';
+        this.HARMONICDISTPROC = 'harmonicDistortionProcessor';
 
         // update volume when slider value changes
         emitter.on("gainVolumeChange", (value) => {
@@ -34,18 +33,28 @@ class AudioManager {
         if(this.audioBuffer){
             emitter.emit('audioLoaded');
             console.log("AudioBuffer created");
-            await this.connectHarmonicDistPipeline();
+            await this.connectDegradationPipeline();
         }
     }
 
-    async connectHarmonicDistPipeline() {
-        await this.audioWorklet.addModule('./src/audioEngine/harmonicDistortionProcessor.js', {}).then(() => {
-            this.harmonicDistNode = new AudioWorkletNode(this.audioContext, 'harmonicDistortionProcessor');
-            this.gainNode.connect(this.harmonicDistNode).connect(this.audioContext.destination);
-        });
+    async connectDegradationPipeline() {
+        const degradation = this.getDegradationURL()
+        if (degradation) {
+            await this.audioWorklet.addModule(degradation.url, {}).then(() => {
+                this.degradationNode = new AudioWorkletNode(this.audioContext, degradation.processor);
+                this.gainNode.connect(this.degradationNode).connect(this.audioContext.destination);
+            });
+        }
     }
 
-    playOrPause(state) {
+    // async connectHarmonicDistPipeline() {
+    //     await this.audioWorklet.addModule('./src/audioEngine/harmonicDistortionProcessor.js', {}).then(() => {
+    //         this.harmonicDistNode = new AudioWorkletNode(this.audioContext, 'harmonicDistortionProcessor');
+    //         this.gainNode.connect(this.harmonicDistNode).connect(this.audioContext.destination);
+    //     });
+    // }
+
+    playOrPause(state, degradationName) {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
@@ -70,6 +79,15 @@ class AudioManager {
         this.arrayBuffer = await response.arrayBuffer();
         return await this.audioContext.decodeAudioData(this.arrayBuffer);
     }
+
+    getDegradationURL() {
+        if (this.degradationName !== ''){
+            switch (this.degradationName) {
+                case this.HARMONICDISTURL:
+                    return {url: this.HARMONICDISTURL, processor: this.HARMONICDISTPROC};
+            }
+        }
+    }
 }
 
-export const audioManager = new AudioManager();
+export default AudioManager;
