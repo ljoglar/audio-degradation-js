@@ -10,8 +10,6 @@ const audioContext = new (window.AudioContext ||
     window.oAudioContext ||
     window.msAudioContext)();
 
-// const audioManager = new AudioManager(audioContext, './src/assets/audio/cello.wav');
-
 export default {
   components: { HelloWorld, TheWelcome, AudioPlayer},
   provide() {
@@ -23,7 +21,7 @@ export default {
   data() {
     return {
       titleGeneral: 'Control Audio',
-      controlId: null,
+      controlId: 'control',
       titleHarmonicDist: 'Harmonic Distortion',
       harmonicDistId: 'harmonicDistortion',
     }

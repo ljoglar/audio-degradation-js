@@ -1,31 +1,33 @@
 import {emitter} from "../emitter";
+import audioConfig from "./audio_config.js"
 
 class AudioManager {
     constructor(audioContext, audioURL) {
         this.audioContext = audioContext;
         this.audioURL = audioURL;
-        // this.degradationName = degradationName;
-        // this.audioBuffer = null;
         this.audioSource = null;
         this.currentTime = 0;
-        this.audioWorklet = this.audioContext.audioWorklet;
-        this.gainNode = this.audioContext.createGain();
-        this.harmonicDistNode = null;
         this.loadAudio();
-
-        this.HARMONICDISTURL = './src/audioEngine/harmonicDistortionProcessor.js';
-        this.HARMONICDISTPROC = 'harmonicDistortionProcessor';
-
-        // update volume when slider value changes
-        emitter.on("gainVolumeChange", (value) => {
-            this.gainNode.gain.value = value;
-        });
-
-        // update Harmonic Distortion parameter when slider value changes
-        emitter.on("degradationParamChange", (value) =>{
-            const harmonicDistParam = this.harmonicDistNode.parameters.get('numApplications');
-            harmonicDistParam.setValueAtTime(value, this.audioContext.currentTime);
-        })
+        this.degradationObject = {
+            'control': {
+                'audioSource': null,
+                'audioWorklet': this.audioContext.audioWorklet,
+                'degradationNode': null,
+                'gainNode': this.audioContext.createGain(),
+                'processorUrl': undefined,
+                'processorParams': [],
+                'times': {"playedAt": 0, "pausedAt": 0}
+            },
+            'harmonicDistortion': {
+                'audioSource': null,
+                'audioWorklet': this.audioContext.audioWorklet,
+                'degradationNode': null,
+                'gainNode': this.audioContext.createGain(),
+                'processorUrl': audioConfig.harmonicDistortion.processorUrl,
+                'processorParam': 'numApplications',
+                'times': {"playedAt": 0, "pausedAt": 0}
+            }
+        }
     }
 
     async loadAudio() {
@@ -33,45 +35,51 @@ class AudioManager {
         if(this.audioBuffer){
             emitter.emit('audioLoaded');
             console.log("AudioBuffer created");
-            await this.connectDegradationPipeline();
+            await this.connectDegradationPipelines();
         }
     }
 
-    async connectDegradationPipeline() {
-        const degradation = this.getDegradationURL()
-        if (degradation) {
-            await this.audioWorklet.addModule(degradation.url, {}).then(() => {
-                this.degradationNode = new AudioWorkletNode(this.audioContext, degradation.processor);
-                this.gainNode.connect(this.degradationNode).connect(this.audioContext.destination);
-            });
-        }
+    async connectDegradationPipelines() {
+        Object.entries(this.degradationObject).forEach(entry => {
+            const [degradation, attrs] = entry;
+            attrs.gainNode.connect(this.audioContext.destination);
+            attrs.gainNode.gain.value = 0.4;
+            if (typeof attrs.processorUrl !== 'undefined') {
+                attrs.audioWorklet.addModule(attrs.processorUrl, {}).then(() => {
+                    attrs.degradationNode = new AudioWorkletNode(this.audioContext, degradation + 'Processor');
+                    attrs.gainNode.connect(attrs.degradationNode).connect(this.audioContext.destination);
+                });
+            }
+        });
     }
-
-    // async connectHarmonicDistPipeline() {
-    //     await this.audioWorklet.addModule('./src/audioEngine/harmonicDistortionProcessor.js', {}).then(() => {
-    //         this.harmonicDistNode = new AudioWorkletNode(this.audioContext, 'harmonicDistortionProcessor');
-    //         this.gainNode.connect(this.harmonicDistNode).connect(this.audioContext.destination);
-    //     });
-    // }
 
     playOrPause(state, degradationName) {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
         if (state === true) {
-            this.audioSource = this.audioContext.createBufferSource();
-            this.audioSource.buffer = this.audioBuffer;
-            this.audioSource.connect(this.gainNode);
-            this.audioSource.start(this.currentTime);
+            this.degradationObject[degradationName].audioSource = this.audioContext.createBufferSource();
+            this.degradationObject[degradationName].audioSource.buffer = this.audioBuffer;
+            this.degradationObject[degradationName].audioSource.connect(this.degradationObject[degradationName].gainNode);
+            let startAt = 0;
+            if ( this.degradationObject[degradationName].times.pausedAt === 0){
+                startAt = this.degradationObject[degradationName].times.pausedAt;
+            }
+            this.degradationObject[degradationName].audioSource.start(this.audioContext.currentTime, startAt);
+            this.degradationObject[degradationName].times.playedAt = this.audioContext.currentTime;
         } else if (state === false) {
-            this.currentTime = this.audioContext.currentTime;
-            this.audioSource.stop();
+            this.degradationObject[degradationName].time = this.audioContext.currentTime;
+            this.degradationObject[degradationName].audioSource.stop();
+            this.degradationObject[degradationName].times.pausedAt = this.degradationObject[degradationName].times.pausedAt +
+                this.audioContext.currentTime - this.degradationObject[degradationName].times.playedAt;
+            console.log(this.degradationObject[degradationName].times.pausedAt);
         }
     }
 
-    stop() {
-        this.currentTime = this.audioContext.currentTime;
-        this.audioSource.stop();
+    stop(degradationName) {
+        this.degradationObject[degradationName].time = this.audioContext.currentTime;
+        this.degradationObject[degradationName].audioSource.stop();
+        this.degradationObject[degradationName].times.pausedAt = 0;
     }
 
     async loadAudioTrack() {
@@ -80,13 +88,13 @@ class AudioManager {
         return await this.audioContext.decodeAudioData(this.arrayBuffer);
     }
 
-    getDegradationURL() {
-        if (this.degradationName !== ''){
-            switch (this.degradationName) {
-                case this.HARMONICDISTURL:
-                    return {url: this.HARMONICDISTURL, processor: this.HARMONICDISTPROC};
-            }
-        }
+    gainVolumeChange(value, degradationName){
+        this.degradationObject[degradationName].gainNode.gain.value = value;
+    }
+
+    degradationParamChange(value, degradationName){
+        const harmonicDistParam = this.degradationObject[degradationName].degradationNode.parameters.get(this.degradationObject[degradationName].processorParam);
+        harmonicDistParam.setValueAtTime(value, this.audioContext.currentTime);
     }
 }
 

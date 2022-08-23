@@ -5,7 +5,7 @@
     <div id="controls">
       <button @click="audioPlay" :disabled="!audioLoaded">{{ playAction }}</button>
       <button @click="audioStop">stop</button>
-      <input type="range" min="0" max="1" step="0.1" @change="updateGainValue"/>
+      <input type="range" min="0" max="1" step="0.1" value="0.4" @change="updateGainValue"/>
       <input type="range" min="0" max="10" step="1" value="3" @change="updateDegradation"/>
     </div>
   </div>
@@ -63,15 +63,15 @@ export default {
       console.log("stop audio");
       this.playAction = 'play';
       this.progressState = 'stopped';
-      this.audioManager.stop();
+      this.audioManager.stop(this.degradationName);
     },
 
     updateGainValue(e) {
-      emitter.emit("gainVolumeChange", e.target.value);
+      this.audioManager.gainVolumeChange( e.target.value, this.degradationName);
     },
 
     updateDegradation(e) {
-      emitter.emit("degradationParamChange", e.target.value);
+      this.audioManager.degradationParamChange( e.target.value, this.degradationName);
     }
   }
 }
