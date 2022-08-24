@@ -62,7 +62,7 @@ class AudioManager {
             this.degradationObject[degradationName].audioSource.buffer = this.audioBuffer;
             this.degradationObject[degradationName].audioSource.connect(this.degradationObject[degradationName].gainNode);
             let startAt = 0;
-            if ( this.degradationObject[degradationName].times.pausedAt === 0){
+            if ( this.degradationObject[degradationName].times.pausedAt !== 0){
                 startAt = this.degradationObject[degradationName].times.pausedAt;
             }
             this.degradationObject[degradationName].audioSource.start(this.audioContext.currentTime, startAt);
@@ -72,7 +72,6 @@ class AudioManager {
             this.degradationObject[degradationName].audioSource.stop();
             this.degradationObject[degradationName].times.pausedAt = this.degradationObject[degradationName].times.pausedAt +
                 this.audioContext.currentTime - this.degradationObject[degradationName].times.playedAt;
-            console.log(this.degradationObject[degradationName].times.pausedAt);
         }
     }
 
