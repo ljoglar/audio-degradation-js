@@ -58,14 +58,12 @@ class AudioManager {
             this.audioContext.resume();
         }
         if (state === true) {
-            this.degradationObject[degradationName].audioSource = this.audioContext.createBufferSource();
-            this.degradationObject[degradationName].audioSource.buffer = this.audioBuffer;
-            this.degradationObject[degradationName].audioSource.connect(this.degradationObject[degradationName].gainNode);
             let startAt = 0;
             if ( this.degradationObject[degradationName].times.pausedAt !== 0){
                 startAt = this.degradationObject[degradationName].times.pausedAt;
             }
-            this.degradationObject[degradationName].audioSource.start(this.audioContext.currentTime, startAt);
+            this.playAudio(degradationName, startAt);
+
             this.degradationObject[degradationName].times.playedAt = this.audioContext.currentTime;
         } else if (state === false) {
             this.degradationObject[degradationName].time = this.audioContext.currentTime;
@@ -75,8 +73,22 @@ class AudioManager {
         }
     }
 
+    updatePosition(degradationName, state, offset) {
+        this.degradationObject[degradationName].times.pausedAt = offset;
+        if (state === false) {
+            this.stop(degradationName);
+            this.playAudio(degradationName, offset);
+        }
+    }
+
+    playAudio(degradationName, offset = 0) {
+        this.degradationObject[degradationName].audioSource = this.audioContext.createBufferSource();
+        this.degradationObject[degradationName].audioSource.buffer = this.audioBuffer;
+        this.degradationObject[degradationName].audioSource.connect(this.degradationObject[degradationName].gainNode);
+        this.degradationObject[degradationName].audioSource.start(this.audioContext.currentTime, offset);
+    }
+
     stop(degradationName) {
-        this.degradationObject[degradationName].time = this.audioContext.currentTime;
         this.degradationObject[degradationName].audioSource.stop();
         this.degradationObject[degradationName].times.pausedAt = 0;
     }

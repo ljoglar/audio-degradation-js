@@ -1,7 +1,7 @@
 <template>
   <div :id="playerId">
     <h1><slot></slot></h1>
-    <ProgressBar :onPlayerAction ="progressState" />
+    <ProgressBar :degradationName='this.degradationName' :onPlayerAction ="progressState" />
     <div id="controls">
       <button @click="audioPlay" :disabled="!audioLoaded">{{ playAction }}</button>
       <button @click="audioStop">stop</button>
@@ -24,9 +24,7 @@ export default {
   props: ['title', 'degradationName'],
   data() {
     return {
-      //audioManager: this.audioManager,
       uuid: uuidv4(),
-      //title: "Default Title",
       playAction: 'play', // play, pause
       wavesurfer: null,
       audioLoaded: false,

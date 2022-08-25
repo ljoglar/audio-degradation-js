@@ -10,21 +10,24 @@
 
 export default {
   name: "ProgressBar",
-  props: ['onPlayerAction'],
+  inject: ['audioManager'],
+  props: ['onPlayerAction', 'degradationName'],
   data() {
     return {
       value: 0,
       maxValue: 100,
       currentTime: 0,
       currentDate: new Date(1000),
-      currentDateString: '00:00'
+      currentDateString: '00:00',
+      state: 'stopped'
     }
   },
   methods: {
     updateTime(e) {
-      console.log(e.target.value);
       this.currentTime = e.target.value;
       this.updateDate();
+      const isPaused = this.state !== 'playing';
+      this.audioManager.updatePosition(this.degradationName, isPaused, this.currentTime);
     },
 
     updateDate() {
@@ -34,7 +37,7 @@ export default {
 
     startProgress() {
       this.interval = setInterval(() => {
-        this.value = this.value + 0.1;
+        this.value = parseFloat(this.value) + 0.1;
         this.currentTime = this.value;
         this.updateDate();
       }, 100);
@@ -53,7 +56,8 @@ export default {
   },
   watch: {
     onPlayerAction: function(newVal) {
-      switch (newVal) {
+      this.state = newVal;
+      switch (this.state) {
         case 'playing':
           this.startProgress();
           break;
