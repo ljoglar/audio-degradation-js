@@ -7,6 +7,9 @@
     "preview": "vite preview --port 4173"
   },
   "dependencies": {
+    "bootstrap": "^5.2.0",
+    "lottie-web": "^5.9.6",
+    "lottie-web-vue": "^2.0.6",
     "tiny-emitter": "^2.1.0",
     "uuidv4": "^6.2.13",
     "vue": "^3.2.37",

@@ -1,7 +1,7 @@
 <template>
     <div class="slider">
       <output id="rangeValue"> {{ currentDateString }} </output>
-      <input type="range" min="0" max="100" step="0.1" @change="updateTime" v-model="value"/>
+      <input type="range" class="form-range" min="0" max="100" step="0.1" @change="updateTime" v-model="value" />
       <p id="maxValue">00:00</p>
     </div>
 </template>
@@ -71,29 +71,22 @@ export default {
     }
   }
 }
-
 </script>
 
 <style scoped>
-/*.container {*/
-/*  display: flex;*/
-/*  width: 500px;*/
-/*  height: 500px;*/
-/*  margin: auto;*/
-/*  text-alignt: center;*/
-/*}*/
 .slider {
   width: 100%;
-  /*margin: 50% auto;*/
+  display: flex;
+  padding-top: 12px;
+  height: 32px;
+  margin-left: 5px;
 }
 
 input {
-  width: 80%;
+  padding: 0px 7px;
 }
 
-#maxValue {
-  width: 10%;
-  display: inline;
+#maxValue, output {
+  top: -1px;
 }
-
 </style>

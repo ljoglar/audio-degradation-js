@@ -1,8 +1,8 @@
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
 import AudioPlayer from './components/AudioPlayer.vue'
 import AudioManager from './audioEngine/AudioManager.js'
+import Top from './components/Top.vue'
+import Foot from './components/Foot.vue'
 
 const audioContext = new (window.AudioContext ||
     window.webkitAudioContext ||
@@ -11,7 +11,7 @@ const audioContext = new (window.AudioContext ||
     window.msAudioContext)();
 
 export default {
-  components: { HelloWorld, TheWelcome, AudioPlayer},
+  components: {Top, AudioPlayer, Foot},
   provide() {
     return {
       audioContext: audioContext,
@@ -32,28 +32,48 @@ export default {
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <Top/>
     </div>
   </header>
 
   <main>
-    <TheWelcome />
     <AudioPlayer :degradationName='controlId' > {{titleGeneral}}</AudioPlayer>
     <AudioPlayer :degradationName='harmonicDistId'>{{titleHarmonicDist}}</AudioPlayer>
   </main>
+
+  <footer>
+    <Foot/>
+  </footer>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
+  height: 700px;
+  background-image: url("../public/assets/img/header.jpg");
+  background-position: bottom;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+main {
+  max-width: 1280px;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+.wrapper {
+  max-width: 980px;
+  height: 460px;
+  padding: 5rem;
+  margin: 0 auto;
+  background-color: #7fd6ff21;
+  border-radius: 20pt;
+  text-align: center;
+}
+
+footer {
+  min-height: 160px;
+  background-color: grey;
 }
 
 @media (min-width: 1024px) {
@@ -61,10 +81,6 @@ header {
     display: flex;
     place-items: center;
     padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
   }
 
   header .wrapper {
