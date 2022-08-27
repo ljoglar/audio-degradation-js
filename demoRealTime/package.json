@@ -7,9 +7,11 @@
     "preview": "vite preview --port 4173"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.2",
+    "@fortawesome/free-solid-svg-icons": "^6.1.2",
+    "@fortawesome/vue-fontawesome": "^3.0.1",
     "bootstrap": "^5.2.0",
-    "lottie-web": "^5.9.6",
-    "lottie-web-vue": "^2.0.6",
+    "bootstrap-icons": "^1.9.1",
     "tiny-emitter": "^2.1.0",
     "uuidv4": "^6.2.13",
     "vue": "^3.2.37",

@@ -77,7 +77,7 @@ export default {
 .slider {
   width: 100%;
   display: flex;
-  padding-top: 12px;
+  padding-top: 15px;
   height: 32px;
   margin-left: 5px;
 }

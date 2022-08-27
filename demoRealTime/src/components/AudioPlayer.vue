@@ -2,8 +2,13 @@
   <div :id="playerId" class="audioPlayer">
     <h1><slot></slot></h1>
     <div class="progressBar">
-      <button class="btn btn-success playerButton" @click="audioPlay" :disabled="!audioLoaded" > {{ playAction }} </button>
-      <button class="btn btn-dark playerButton" @click="audioStop">stop</button>
+      <button class="btn btn-success playerButton" @click="audioPlay" :disabled="!audioLoaded" >
+        <font-awesome-icon icon="fa-solid fa-play" v-if="!isPlaying" />
+        <font-awesome-icon icon="fa-solid fa-pause" v-else />
+      </button>
+      <button class="btn btn-dark playerButton" @click="audioStop">
+        <font-awesome-icon icon="fa-solid fa-stop" />
+      </button>
       <ProgressBar :degradationName='this.degradationName' :onPlayerAction ="progressState" />
     </div>
     <div class="controls">
@@ -27,22 +32,21 @@
 import {v4 as uuidv4} from 'uuid';
 import ProgressBar from "./ProgressBar.vue";
 import {emitter} from "../emitter";
-import LottieAnimation from 'lottie-web-vue';
 
 export default {
   name: "audioPlayer",
-  components: {ProgressBar, LottieAnimation},
+  components: {ProgressBar},
   inject: ['audioManager'],
   props: ['title', 'degradationName'],
   data() {
     return {
       uuid: uuidv4(),
-      playAction: 'play', // play, pause
       wavesurfer: null,
       audioLoaded: false,
       progressState: 'stopped', // playing, paused, stopped
       volumeValue: 0.4,
-      paramValue: 3
+      paramValue: 3,
+      isPlaying: false,
     }
   },
   computed: {
@@ -57,22 +61,22 @@ export default {
   },
   methods: {
     audioPlay() {
-      console.log("play audio");
-      console.log(this.audioManager);
-      if (this.playAction === 'play') {
-        this.audioManager.playOrPause(true, this.degradationName);
+      if (!this.isPlaying) {
+        this.isPlaying = true;
+        this.audioManager.playOrPause(this.isPlaying, this.degradationName);
         this.progressState = 'playing';
-        this.playAction = 'pause';
-      } else if (this.playAction === 'pause') {
-        this.audioManager.playOrPause(false, this.degradationName);
-        this.playAction = 'play';
+        // this.playAction = 'pause';
+      } else {
+        this.isPlaying = false;
+        this.audioManager.playOrPause(this.isPlaying, this.degradationName);
+        // this.playAction = 'play';
         this.progressState = 'paused';
       }
     },
 
     audioStop() {
       console.log("stop audio");
-      this.playAction = 'play';
+      this.isPlaying = false;
       this.progressState = 'stopped';
       this.audioManager.stop(this.degradationName);
     },
@@ -113,6 +117,9 @@ export default {
 
 .playerButton {
   margin: 5px;
+  width: 48px;
+  height: 44px;
+  border-radius: 22px;
 }
 
 .form-range {
@@ -121,13 +128,6 @@ export default {
 
 output#rangeValue{
   margin-left: 3px;
-}
-
-.playAnim {
-  width: 90%;
-  max-width: 50px;
-  margin-bottom: 30px;
-  cursor: pointer;
 }
 
 </style>

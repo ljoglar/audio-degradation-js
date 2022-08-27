@@ -63,9 +63,8 @@ class AudioManager {
                 startAt = this.degradationObject[degradationName].times.pausedAt;
             }
             this.playAudio(degradationName, startAt);
-
             this.degradationObject[degradationName].times.playedAt = this.audioContext.currentTime;
-        } else if (state === false) {
+        } else {
             this.degradationObject[degradationName].time = this.audioContext.currentTime;
             this.degradationObject[degradationName].audioSource.stop();
             this.degradationObject[degradationName].times.pausedAt = this.degradationObject[degradationName].times.pausedAt +
