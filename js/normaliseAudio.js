@@ -1,3 +1,5 @@
+import AudioDegradation from "./audioDegradation";
+
 /**
  * Audio Degradation Toolkit in JavaScript
  * Normalisation Degradation Unit
@@ -12,24 +14,19 @@
  * Date: August 2022
  */
 
-class normaliseAudio extends DegradationBase{
-    /**
-     * @param {audio}
-     * @param {number} fs
-     * @param {number} max_amplitude
-     */
-    constructor(audio, fs, max_amplitude = 0.999) {
-        super(audio, fs);
-        this.max_amplitude = max_amplitude;
-    }
-
-    execute(){
-        if (this.audio !== null) {
-            const maxValueInAudio = Math.max(Math.max(Math.max(Math.abs(this.audio))));
-            this.audio.forEach((channel) => {
-                this.audioOut.push(channel.map((sample) => this.max_amplitude * sample / maxValueInAudio, MIN_VALUE));
+class NormaliseAudio{
+    static execute(audio, max_amplitude = 0.999){
+        let audioOut;
+        if ( audio !== null ) {
+            audioOut = [...audio];
+            const maxValueInAudio = Math.max(Math.max(Math.max(Math.abs(audio))));
+            console.log(audio);
+            audioOut.forEach((channel, index) => {
+                // channel = channel.map((sample) => max_amplitude * sample / maxValueInAudio);
+                channel = channel.map((sample) => 1 * sample);
+                audioOut[index] = channel;
             });
-
+            return audioOut;
             /*
             let lengthAudio = length(this.audio[0]);
             for (var i = 0; i < lengthAudio; i++ ){
@@ -40,17 +37,18 @@ class normaliseAudio extends DegradationBase{
         }
     }
 }
+export default NormaliseAudio;
 
-let NormaliseAudio = function (audio){
-    if (typeof audio !== "object"){
-        throw new TypeError();
-    }
-    let audioNormalised;
-    if (this.audio !== null) {
-        const maxValueInAudio = Math.max(Math.max(Math.max(Math.abs(this.audio))));
-        audio.forEach((channel) => {
-            audioNormalised.push(channel.map((sample) => this.max_amplitude * sample / maxValueInAudio, MIN_VALUE));
-        });
-    }
-    return audioNormalised;
-}
+// let NormaliseAudio = function (audio){
+//     if (typeof audio !== "object"){
+//         throw new TypeError();
+//     }
+//     let audioNormalised;
+//     if (this.audio !== null) {
+//         const maxValueInAudio = Math.max(Math.max(Math.max(Math.abs(this.audio))));
+//         audio.forEach((channel) => {
+//             audioNormalised.push(channel.map((sample) => this.max_amplitude * sample / maxValueInAudio, MIN_VALUE));
+//         });
+//     }
+//     return audioNormalised;
+// }

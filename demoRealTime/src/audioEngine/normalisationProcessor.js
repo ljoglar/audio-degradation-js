@@ -1,6 +1,6 @@
 import AudioDegradation from '../../../js/audioDegradation.js'
 
-class HarmonicDistortionProcessor extends AudioWorkletProcessor {
+class NormalisationProcessor extends AudioWorkletProcessor {
     static get parameterDescriptors () {
         return [{
             name: 'numApplications',
@@ -14,13 +14,13 @@ class HarmonicDistortionProcessor extends AudioWorkletProcessor {
         this.audioDegradation = new AudioDegradation();
     }
     process (inputs, outputs, parameters) {
-        let audioReturned = this.audioDegradation.addHarmonicDistortion(inputs[0], parameters['numApplications'][0]);
+        let audioReturned = this.audioDegradation.normalise(inputs[0], parameters['max_amplitude']);
         audioReturned.forEach((channel, i) => {
-           channel.forEach((sample, j) => {
-               outputs[0][i][j] = sample;
-           })
+            channel.forEach((sample, j) => {
+                outputs[0][i][j] = sample;
+            })
         });
         return true;
     }
 }
-registerProcessor('harmonicDistortionProcessor', HarmonicDistortionProcessor);
+registerProcessor('normalisationProcessor', NormalisationProcessor);

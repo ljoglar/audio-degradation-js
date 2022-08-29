@@ -8,6 +8,13 @@ class AudioManager {
         this.audioSource = null;
         this.currentTime = 0;
         this.loadAudio();
+        this.normalisationObject = {
+            'normalise': true,
+            'audioWorklet': this.audioContext.audioWorklet,
+            'normalisationNode': null,
+            'processorUrl': audioConfig.normalisation.processorUrl,
+            'processorParams': ['max_amplitude']
+        }
         this.degradationObject = {
             'control': {
                 'audioSource': null,
@@ -35,8 +42,15 @@ class AudioManager {
         if(this.audioBuffer){
             emitter.emit('audioLoaded');
             console.log("AudioBuffer created");
+            await this.createNormalisation();
             await this.connectDegradationPipelines();
         }
+    }
+
+    async createNormalisation(){
+        this.normalisationObject.audioWorklet.addModule(this.normalisationObject.processorUrl, {}).then(() => {
+            this.normalisationObject.normalisationNode = new AudioWorkletNode(this.audioContext, 'normalisationProcessor');
+        });
     }
 
     async connectDegradationPipelines() {
@@ -47,7 +61,11 @@ class AudioManager {
             if (typeof attrs.processorUrl !== 'undefined') {
                 attrs.audioWorklet.addModule(attrs.processorUrl, {}).then(() => {
                     attrs.degradationNode = new AudioWorkletNode(this.audioContext, degradation + 'Processor');
-                    attrs.gainNode.connect(attrs.degradationNode).connect(this.audioContext.destination);
+                    // attrs.gainNode.connect(attrs.degradationNode).connect(this.normalisationObject.normalisationNode).connect(this.audioContext.destination);
+                    attrs.gainNode.connect(this.normalisationObject.normalisationNode).connect(this.audioContext.destination);
+                    // if (!this.normalisationObject.normalise) {
+                    //     attrs.gainNode.connect(attrs.degradationNode).connect(this.audioContext.destination);
+                    // }
                 });
             }
         });
