@@ -19,23 +19,37 @@ class NormaliseAudio{
         let audioOut;
         if ( audio !== null ) {
             audioOut = [...audio];
-            const maxValueInAudio = Math.max(Math.max(Math.max(Math.abs(audio))));
-            console.log(audio);
+            const maxValueInAudio = this.getMaxSampleValueInAudio(audio);
+            // console.log('maxValueInAudio');
+            // console.log(maxValueInAudio);
+            const normCoeff = max_amplitude / maxValueInAudio;
+            // console.log('normCoeff');
+            // console.log(normCoeff);
             audioOut.forEach((channel, index) => {
-                // channel = channel.map((sample) => max_amplitude * sample / maxValueInAudio);
-                channel = channel.map((sample) => 1 * sample);
+                channel = channel.map((sample) => normCoeff * sample <= 0.999 ? normCoeff * sample : 0.999);
+                // console.log(channel);
+                // channel = channel.map((sample) => 1 * sample);
                 audioOut[index] = channel;
             });
             return audioOut;
-            /*
-            let lengthAudio = length(this.audio[0]);
-            for (var i = 0; i < lengthAudio; i++ ){
-                this.audioOut[0].append(this.max_amplitude * this.audio[0][i] / maxValueInAudio, MIN_VALUE));
-                this.audioOut[1].append(this.max_amplitude * this.audio[1][i] / maxValueInAudio, MIN_VALUE));
-            }
-            */
         }
     }
+
+    static getMaxSampleValueInAudio(audio) {
+        let maxSamples = [];
+        audio.forEach((channel, index) => {
+            // console.log(channel);
+            const channelAbs = channel.map((sample) => Math.abs(sample));
+            // console.log(channelAbs);
+            // console.log(Math.max(...channelAbs));
+
+            maxSamples.push(Math.max(...channelAbs));
+            // console.log(maxSamples);
+        });
+        return Math.max(maxSamples) > 0 ? Math.max(maxSamples) : Number.MIN_VALUE;
+        // Math.max(Math.max(Math.max(Math.abs(audio))));
+    }
+
 }
 export default NormaliseAudio;
 

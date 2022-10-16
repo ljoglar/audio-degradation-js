@@ -1,12 +1,15 @@
 import {emitter} from "../emitter";
 import audioConfig from "./audio_config.js"
+import AudioDegradation from "../../../js/audioDegradation";
 
 class AudioManager {
     constructor(audioContext, audioURL) {
         this.audioContext = audioContext;
         this.audioURL = audioURL;
+        this.audioDegradation = new AudioDegradation();
         this.audioSource = null;
         this.currentTime = 0;
+        this.audioChannels = null;
         this.loadAudio();
         this.normalisationObject = {
             'normalise': true,
@@ -44,11 +47,17 @@ class AudioManager {
             console.log("AudioBuffer created");
             await this.createNormalisation();
             await this.connectDegradationPipelines();
+            await this.getAudioData();
         }
     }
 
+    async getAudioData(){
+        this.audioChannels = Array.from({length: this.audioBuffer.numberOfChannels});
+        this.audioChannels.map((channel, index) => this.audioChannels[index] = this.audioBuffer.getChannelData(index));
+    }
+
     async createNormalisation(){
-        this.normalisationObject.audioWorklet.addModule(this.normalisationObject.processorUrl, {}).then(() => {
+        await this.normalisationObject.audioWorklet.addModule(this.normalisationObject.processorUrl, {}).then(() => {
             this.normalisationObject.normalisationNode = new AudioWorkletNode(this.audioContext, 'normalisationProcessor');
         });
     }
@@ -62,7 +71,9 @@ class AudioManager {
                 attrs.audioWorklet.addModule(attrs.processorUrl, {}).then(() => {
                     attrs.degradationNode = new AudioWorkletNode(this.audioContext, degradation + 'Processor');
                     // attrs.gainNode.connect(attrs.degradationNode).connect(this.normalisationObject.normalisationNode).connect(this.audioContext.destination);
-                    attrs.gainNode.connect(this.normalisationObject.normalisationNode).connect(this.audioContext.destination);
+                    attrs.gainNode.connect(this.audioContext.destination);
+                    // console.log(this.normalisationObject.normalisationNode);
+                    // attrs.gainNode.connect(this.normalisationObject.normalisationNode).connect(this.audioContext.destination);
                     // if (!this.normalisationObject.normalise) {
                     //     attrs.gainNode.connect(attrs.degradationNode).connect(this.audioContext.destination);
                     // }
@@ -98,6 +109,14 @@ class AudioManager {
         }
     }
 
+    playAudioD(audioBuffer, degradationName, offset = 0) {
+        console.log(degradationName);
+        this.degradationObject[degradationName].audioSource = this.audioContext.createBufferSource();
+        this.degradationObject[degradationName].audioSource.buffer = audioBuffer;
+        this.degradationObject[degradationName].audioSource.connect(this.degradationObject[degradationName].gainNode);
+        this.degradationObject[degradationName].audioSource.start(this.audioContext.currentTime, offset);
+    }
+
     playAudio(degradationName, offset = 0) {
         this.degradationObject[degradationName].audioSource = this.audioContext.createBufferSource();
         this.degradationObject[degradationName].audioSource.buffer = this.audioBuffer;
@@ -121,9 +140,33 @@ class AudioManager {
     }
 
     degradationParamChange(value, degradationName){
-        const harmonicDistParam = this.degradationObject[degradationName].degradationNode.parameters.get(this.degradationObject[degradationName].processorParam);
-        harmonicDistParam.setValueAtTime(value, this.audioContext.currentTime);
+        // const harmonicDistParam = this.degradationObject[degradationName].degradationNode.parameters.get(this.degradationObject[degradationName].processorParam);
+        // harmonicDistParam.setValueAtTime(value, this.audioContext.currentTime);
+        this.computeHarmonicDist(value, degradationName);
     }
+
+    computeHarmonicDist(value, degradationName){
+        console.log(this.audioChannels);
+        console.log(value);
+        console.log(degradationName);
+        const audioComputed = this.audioDegradation.addHarmonicDistortion(this.audioChannels, 3);
+        const audioNormalised = this.audioDegradation.normalise(audioComputed, 0.99);
+        const arrayBuffer =  this.audioContext.createBuffer(this.audioBuffer.numberOfChannels, this.audioBuffer.length, this.audioBuffer.sampleRate);
+        for (let i = 0; i < this.audioBuffer.numberOfChannels; i++){
+            arrayBuffer.copyToChannel(audioNormalised[i], i);
+        }
+        this.playAudioD(arrayBuffer, degradationName, this.audioContext.currentTime);
+    }
+
+    // addHarmonicDistortion(){
+    //     let dataHarmonicDist = this.audioDegradation.addHarmonicDistortion(3);
+    //     this.audioWithHarmonicDist = this.audioContext.createBuffer(this.audioBuffer.numberOfChannels, this.audioBuffer.length, this.audioBuffer.sampleRate);
+    //     for (let i = 0; i < this.audioBuffer.numberOfChannels; i++){
+    //         this.audioWithHarmonicDist.copyToChannel(dataHarmonicDist[i], i);
+    //     }
+    //     return this.audioWithHarmonicDist;
+    // }
+
 }
 
 export default AudioManager;

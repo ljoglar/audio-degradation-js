@@ -53,6 +53,7 @@ header {
   height: 700px;
   background-image: url("../public/assets/img/header.jpg");
   background-position: bottom;
+  padding: 0 !important;
 }
 
 main {

@@ -19,12 +19,12 @@ class AudioDegradation {
         this.audio = audio;
     }
 
-    normalise(audio, max_amplitude){
+    normalise(audio = this.audio, max_amplitude){
         return NormaliseAudio.execute(audio, max_amplitude);
     }
 
-    addHarmonicDistortion(audio, num_applications){
-        return HarmonicDistortion.execute(audio, num_applications);
+    addHarmonicDistortion(audio = this.audio, num_applications){
+        return HarmonicDistortion.execute(audio , num_applications);
     }
 }
 

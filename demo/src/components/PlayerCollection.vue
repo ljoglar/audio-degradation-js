@@ -8,6 +8,7 @@ export default {
   data() {
     return {
       titleGeneral: 'Control Audio',
+      control: 'control',
       titleHarmonicDist: 'Harmonic Distortion'
     }
   }
@@ -15,8 +16,8 @@ export default {
 </script>
 
 <template>
-  <AudioPlayer>{{titleGeneral}}</AudioPlayer>
-  <AudioPlayer>{{titleHarmonicDist}}</AudioPlayer>
+  <AudioPlayer :isDegradation="false" :degradationName='control'>{{titleGeneral}}</AudioPlayer>
+  <AudioPlayer :degradationName='titleHarmonicDist'>{{titleHarmonicDist}}</AudioPlayer>
 </template>
 
 <style scoped>
